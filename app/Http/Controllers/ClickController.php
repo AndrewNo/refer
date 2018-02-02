@@ -7,6 +7,14 @@ use Illuminate\Http\Request;
 
 class ClickController extends Controller
 {
+
+    public function index()
+    {
+        $data['clicks'] = Click::all();
+
+        return view('welcome', $data);
+    }
+
     public function click(Request $request)
     {
         $check_bundle = Click::where('ua', $request->server('HTTP_USER_AGENT'))->where('ip', $request->ip())->where('ref', $request->server('HTTP_REFERER'))->where('param1', $request->param1)->first();
@@ -20,7 +28,7 @@ class ClickController extends Controller
             $new_click->param2 = $request->param2;
             $new_click->save();
 
-            $id_click = hash('md5', $request->param1 . $request->param2).$new_click->id;
+            $id_click = hash('md5', $request->param1 . $request->param2) . $new_click->id;
 
             return redirect()->route('succes', [$id_click]);
         }
@@ -28,7 +36,7 @@ class ClickController extends Controller
         $check_bundle->error = $check_bundle->error + 1;
         $check_bundle->save();
 
-        $id_click = hash('md5', $request->param1 . $request->param2).$check_bundle->id;
+        $id_click = hash('md5', $request->param1 . $request->param2) . $check_bundle->id;
 
         return redirect()->route('error', [$id_click]);
     }
@@ -42,7 +50,8 @@ class ClickController extends Controller
 
     }
 
-    public function error(){
+    public function error()
+    {
         return view('error');
     }
 }

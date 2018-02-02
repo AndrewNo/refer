@@ -11,9 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/','ClickController@index');
 
 Route::get('/click', 'ClickController@click')->name('click');
 Route::get('succes/{id_click}', 'ClickController@succes')->name('succes');
