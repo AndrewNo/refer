@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\BadDomain;
 use App\Click;
 use Illuminate\Http\Request;
 
@@ -17,6 +18,20 @@ class ClickController extends Controller
 
     public function click(Request $request)
     {
+
+        $check_domain = BadDomain::where('name', 'LIKE', '%' . $request->server('HTTP_REFERER') . '%')->get();
+
+        if ($check_domain->isNotEmpty()){
+            $check_click = Click::where('ref', 'LIKE', '%' . $request->server('HTTP_REFERER') . '%')->first();
+            $check_click->bad_domain = $check_click->bad_domain + 1;
+            $check_click->save();
+
+            $id_click = hash('md5', $request->param1 . $request->param2) . $check_click->id;
+
+            return redirect()->route('error', [$id_click]);
+        }
+
+
         $check_bundle = Click::where('ua', $request->server('HTTP_USER_AGENT'))->where('ip', $request->ip())->where('ref', $request->server('HTTP_REFERER'))->where('param1', $request->param1)->first();
 
         if ($check_bundle === null) {
@@ -53,5 +68,12 @@ class ClickController extends Controller
     public function error()
     {
         return view('error');
+    }
+
+    public function sort(Request $request)
+    {
+        $data['clicks'] = Click::orderBy($request->column, $request->order)->get();
+
+        return view('sort', $data);
     }
 }
